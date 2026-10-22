@@ -1,0 +1,2 @@
+# linguistics
+Phonetic linguistic
