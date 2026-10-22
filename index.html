@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Trapèze vocalique FLE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Noto+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: instrument panel — vowel list on the left, live F1×F2 chart on the right (stacks on phones) */
+:root{
+  --bg:#F3F6F7; --surface:#FFFFFF; --ink:#13232C; --muted:#5B6B74; --line:#D5DDE1;
+  --accent:#0B6E78; --accent-soft:#D6ECEE; --ref:#7C8A93; --ref-fill:rgba(124,138,147,.14);
+  --good:#2E7D4F; --warn:#A66A00; --bad:#B23A3A;
+  --good-bg:#E3F2E8; --warn-bg:#FBF0DA; --bad-bg:#F8E3E3;
+  --f-display:"Newsreader",Georgia,serif;
+  --f-body:"Noto Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F181D; --surface:#16232A; --ink:#E4ECEF; --muted:#93A4AD; --line:#2A3A42;
+  --accent:#4FC1CB; --accent-soft:#163C42; --ref:#8FA0A9; --ref-fill:rgba(143,160,169,.16);
+  --good:#6CCB92; --warn:#E3AE4B; --bad:#EE7C7C;
+  --good-bg:#16352A; --warn-bg:#3A2E14; --bad-bg:#3D1F22; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F181D; --surface:#16232A; --ink:#E4ECEF; --muted:#93A4AD; --line:#2A3A42;
+  --accent:#4FC1CB; --accent-soft:#163C42; --ref:#8FA0A9; --ref-fill:rgba(143,160,169,.16);
+  --good:#6CCB92; --warn:#E3AE4B; --bad:#EE7C7C;
+  --good-bg:#16352A; --warn-bg:#3A2E14; --bad-bg:#3D1F22; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 40px}
+header{display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:14px}
+h1{font-family:var(--f-display);font-weight:600;font-size:clamp(1.6rem,3.2vw,2.2rem);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1 span{font-family:var(--f-body);font-weight:400;font-size:.9rem;color:var(--muted);margin-left:10px;letter-spacing:0}
+.lede{max-width:68ch;color:var(--muted);margin:10px 0 0}
+.bar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin:16px 0}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;color:var(--ink);font:inherit;font-size:.86rem;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+.lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:6px}
+.btn{font:inherit;font-size:.86rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button:focus-visible,input:focus-visible,label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
+.notice{border-left:3px solid var(--warn);background:var(--warn-bg);padding:8px 12px;border-radius:0 6px 6px 0;font-size:.88rem;margin:0 0 14px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+.list{display:flex;flex-direction:column;gap:6px;min-width:0}
+.row{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:4px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.row.busy{border-color:var(--accent)}
+.ipa{font-size:1.7rem;line-height:1;text-align:center;font-weight:500}
+.words{font-size:.82rem;color:var(--muted)}
+.vals{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:3px}
+.vals label{font-family:var(--f-mono);font-size:.74rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center}
+.vals input{width:62px;font-family:var(--f-mono);font-size:.85rem;font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:5px;padding:2px 5px;background:var(--bg);color:var(--ink)}
+.chip{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.chip.good{background:var(--good-bg);color:var(--good)} .chip.warn{background:var(--warn-bg);color:var(--warn)} .chip.bad{background:var(--bad-bg);color:var(--bad)}
+.chip.none{background:var(--bg);color:var(--muted)}
+.hint{grid-column:2 / 4;font-size:.8rem;color:var(--ink);margin:0}
+.hint em{font-style:normal;font-weight:600}
+.acts{display:flex;gap:6px}
+.acts .btn{padding:5px 9px;font-size:.8rem}
+.acts input[type=file]{position:absolute;width:1px;height:1px;opacity:0}
+.chartbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);min-width:0}
+.chartbox h2{font-family:var(--f-display);font-weight:500;font-size:1.15rem;margin:2px 4px 2px}
+.chartbox .sub{font-size:.8rem;color:var(--muted);margin:0 4px 8px}
+svg{display:block;width:100%;height:auto}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.78rem;color:var(--muted);margin:6px 4px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:5px}
+.src{font-size:.72rem;color:var(--muted);margin:10px 4px 0;max-width:70ch}
+.status{font-size:.82rem;color:var(--muted);min-height:1.3em;margin:0 0 8px}
+textarea{width:100%;font-family:var(--f-mono);font-size:.78rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+details{margin-top:24px;max-width:75ch} summary{cursor:pointer;font-weight:600}
+details p,details li{font-size:.88rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+<header>
+  <div>
+    <h1>Trapèze vocalique FLE <span>フランス語の母音台形</span></h1>
+    <p class="lede">Prononcez chaque voyelle seule, tenue environ une seconde. La page mesure F1 et F2 et place votre voyelle face aux voyelles de 40 locutrices natives. 各母音を1秒ほど伸ばして発音してください。</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div><span class="lbl">Voix</span>
+    <span class="seg" role="group" aria-label="Voix">
+      <button id="vf" aria-pressed="true">femme</button><button id="vm" aria-pressed="false">homme</button>
+    </span></div>
+  <div><span class="lbl">Axes</span>
+    <span class="seg" role="group" aria-label="Échelle">
+      <button id="sh" aria-pressed="true">Hz</button><button id="sz" aria-pressed="false">normalisé</button>
+    </span></div>
+  <button class="btn" id="bex">Charger l'exemple</button>
+  <button class="btn" id="bclr">Effacer</button>
+  <button class="btn" id="bcsv">Copier le CSV</button>
+</div>
+<p class="notice" id="micnote" hidden>Le micro n'est pas accessible dans cette fenêtre. Ouvrez la page directement dans votre navigateur (lien du site, en https), ou enregistrez la voyelle avec votre téléphone puis utilisez « Fichier ».</p>
+<p class="status" id="status" aria-live="polite">Exemple illustratif chargé (valeurs simulées d'un apprenant japonophone). Remplacez-les par vos enregistrements.</p>
+
+<div class="grid">
+  <div class="list" id="list"></div>
+  <div class="chartbox">
+    <h2 id="ctitle">Votre trapèze et la référence native</h2>
+    <p class="sub" id="csub">F2 en abscisse, F1 en ordonnée, axes inversés comme le trapèze de l'API.</p>
+    <svg id="chart" viewBox="0 0 640 500" role="img" aria-label="Trapèze vocalique F1 F2"></svg>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>vos voyelles</span>
+      <span><i style="background:var(--ref-fill);border:1px solid var(--ref)"></i>natives : moyenne ± 1 écart-type</span>
+    </div>
+    <p class="src">Référence : Georgeton, Paillereau, Landron, Gao &amp; Kamiyama (2012), 40 locutrices parisiennes, voyelles isolées en phrase-cadre, Actes JEP 2012, p. 145-152. Mesure : prédiction linéaire (LPC, ordre 10) sur la partie stable de la voyelle ; plafond 5 500 Hz (femme) ou 5 000 Hz (homme). Pour une voix d'homme, l'affichage « normalisé » (Lobanov) est recommandé, la référence étant féminine.</p>
+  </div>
+</div>
+<textarea id="csvbox" rows="6" hidden aria-label="CSV"></textarea>
+
+<details>
+  <summary>Comment ça marche</summary>
+  <ol>
+    <li>Choisissez la voix (femme / homme) : cela règle le plafond d'analyse des formants.</li>
+    <li>Pour chaque voyelle, cliquez « Micro » et prononcez la voyelle pendant 2 secondes, ou importez un fichier audio (WAV, M4A, MP3).</li>
+    <li>La page repère la partie la plus énergique et stable du son, calcule F1, F2, F3 toutes les 10 ms et garde la médiane.</li>
+    <li>La pastille compare votre voyelle à la cible native en écarts-types ; le conseil indique dans quelle direction corriger, et si la voyelle se rapproche d'une autre voyelle française.</li>
+    <li>Vous pouvez corriger une valeur à la main (par exemple mesurée dans Praat) : le graphique se met à jour.</li>
+  </ol>
+  <p>Limite : l'estimation automatique peut se tromper sur les voyelles postérieures (/u o ɔ/), où F1 et F2 sont proches. Vérifiez qu'une valeur paraît plausible avant de l'interpréter.</p>
+</details>
+</div>
+
+<script>
+// ---------- Reference data: Georgeton et al. 2012, table 1 (GD column), Hz, mean and SD ----------
+const VOWELS=[
+ {v:"i",w:"si, lit",f1:275,s1:32,f2:2585,s2:228,f3:3815},
+ {v:"e",w:"été, clé",f1:405,s1:44,f2:2553,s2:174,f3:3346},
+ {v:"ɛ",w:"mère, fait",f1:614,s1:83,f2:2306,s2:160,f3:3137},
+ {v:"a",w:"pas, chat",f1:830,s1:113,f2:1438,s2:183,f3:2900},
+ {v:"ɔ",w:"port, bol",f1:595,s1:100,f2:1144,s2:141,f3:2907},
+ {v:"o",w:"beau, mot",f1:415,s1:44,f2:842,s2:103,f3:2862},
+ {v:"u",w:"bout, doux",f1:291,s1:31,f2:779,s2:93,f3:2648},
+ {v:"y",w:"bu, tu",f1:276,s1:29,f2:2091,s2:167,f3:2579},
+ {v:"ø",w:"peu, deux",f1:409,s1:47,f2:1599,s2:162,f3:2703},
+ {v:"œ",w:"peur, sœur",f1:599,s1:86,f2:1678,s2:156,f3:2843}
+];
+const PERIPH=["i","e","ɛ","a","ɔ","o","u"];
+// Illustrative learner, simulated: fronted /u/, merged /e ɛ/ and /ø œ/ (patterns reported by Kamiyama & Vaissière 2009)
+const EXAMPLE={i:[300,2480],e:[440,2320],"ɛ":[480,2260],a:[790,1480],"ɔ":[540,1080],o:[470,1010],u:[330,1260],y:[300,1880],"ø":[410,1480],"œ":[440,1530]};
+
+// ANALYSIS-START
+function levinson(r,p){
+  const a=new Float64Array(p+1); a[0]=1; let e=r[0];
+  for(let i=1;i<=p;i++){
+    let acc=r[i]; for(let j=1;j<i;j++) acc+=a[j]*r[i-j];
+    const k=-acc/e; const t=a.slice();
+    for(let j=1;j<i;j++) a[j]=t[j]+k*t[i-j];
+    a[i]=k; e*=(1-k*k); if(e<=0) break;
+  }
+  return a;
+}
+function polyRoots(c){ // monic: z^p + c1 z^(p-1) + ... + cp, c[0]=1
+  const p=c.length-1, re=new Float64Array(p), im=new Float64Array(p);
+  let zr=0.4, zi=0.9, wr=1, wi=0;
+  for(let k=0;k<p;k++){const nr=wr*zr-wi*zi, ni=wr*zi+wi*zr; wr=nr; wi=ni; re[k]=wr; im[k]=wi;}
+  for(let it=0;it<500;it++){
+    let delta=0;
+    for(let k=0;k<p;k++){
+      let pr=1, pi=0; // Horner
+      for(let j=1;j<=p;j++){const nr=pr*re[k]-pi*im[k]+c[j], ni=pr*im[k]+pi*re[k]; pr=nr; pi=ni;}
+      let dr=1, di=0;
+      for(let j=0;j<p;j++){ if(j===k) continue; const xr=re[k]-re[j], xi=im[k]-im[j]; const nr=dr*xr-di*xi, ni=dr*xi+di*xr; dr=nr; di=ni;}
+      const den=dr*dr+di*di||1e-30, qr=(pr*dr+pi*di)/den, qi=(pi*dr-pr*di)/den;
+      re[k]-=qr; im[k]-=qi; delta=Math.max(delta,Math.abs(qr)+Math.abs(qi));
+    }
+    if(delta<1e-10) break;
+  }
+  return {re,im};
+}
+function frameFormants(x,sr,order){
+  const n=x.length, y=new Float64Array(n);
+  for(let i=0;i<n;i++){ const pre=i?x[i]-0.97*x[i-1]:x[i]; y[i]=pre*(0.54-0.46*Math.cos(2*Math.PI*i/(n-1))); }
+  const r=new Float64Array(order+1);
+  for(let l=0;l<=order;l++){let s=0; for(let i=l;i<n;i++) s+=y[i]*y[i-l]; r[l]=s;}
+  if(r[0]<=0) return null; r[0]*=1.0001;
+  const a=levinson(r,order), rt=polyRoots(a), out=[];
+  for(let k=0;k<order;k++){
+    if(rt.im[k]<=1e-6) continue;
+    const f=Math.atan2(rt.im[k],rt.re[k])*sr/(2*Math.PI);
+    const bw=-Math.log(Math.hypot(rt.re[k],rt.im[k]))*sr/Math.PI;
+    if(f>90 && f<sr/2-50 && bw<(f<1000?1200:700)) out.push(f);
+  }
+  return out.sort((p,q)=>p-q);
+}
+function median(a){const s=[...a].sort((p,q)=>p-q), m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function analyzeVowel(x,sr){
+  const fl=Math.round(0.04*sr), hop=Math.round(0.01*sr), rms=[];
+  for(let s=0;s+fl<=x.length;s+=hop){let e=0; for(let i=s;i<s+fl;i++) e+=x[i]*x[i]; rms.push(Math.sqrt(e/fl));}
+  if(!rms.length) throw new Error("Son trop court.");
+  const mx=Math.max(...rms); if(mx<1e-4) throw new Error("Aucun son détecté : parlez plus fort ou rapprochez le micro.");
+  const thr=0.3*mx; let best=[0,-1], cur=-1;
+  for(let i=0;i<=rms.length;i++){
+    if(i<rms.length && rms[i]>thr){ if(cur<0) cur=i; }
+    else if(cur>=0){ if(i-cur>best[1]-best[0]+1) best=[cur,i-1]; cur=-1; }
+  }
+  const len=best[1]-best[0]+1;
+  if(len<8) throw new Error("Voyelle trop brève : tenez-la environ une seconde.");
+  const a=best[0]+Math.floor(len*0.25), b=best[1]-Math.floor(len*0.25);
+  const F1=[],F2=[],F3=[];
+  for(let f=a;f<=b;f++){
+    const fm=frameFormants(x.subarray(f*hop,f*hop+fl),sr,10);
+    if(fm && fm.length>=2){F1.push(fm[0]);F2.push(fm[1]); if(fm.length>=3) F3.push(fm[2]);}
+  }
+  if(F1.length<3) throw new Error("Formants introuvables : réessayez dans un endroit calme.");
+  return {f1:Math.round(median(F1)),f2:Math.round(median(F2)),f3:F3.length?Math.round(median(F3)):null,dur:Math.round(len*10)};
+}
+// ANALYSIS-END
+
+// ---------- State ----------
+const state={voice:"f",scale:"hz",data:{}};
+try{const s=JSON.parse(localStorage.getItem("trapeze-fle")||"null"); if(s&&s.data){Object.assign(state,s);}}catch(e){}
+if(!Object.keys(state.data).length) loadExample(false);
+function save(){try{localStorage.setItem("trapeze-fle",JSON.stringify(state));}catch(e){}}
+function loadExample(announce){
+  state.data={}; for(const k in EXAMPLE) state.data[k]={f1:EXAMPLE[k][0],f2:EXAMPLE[k][1],f3:null,src:"exemple"};
+  if(announce) setStatus("Exemple illustratif chargé (valeurs simulées d'un apprenant japonophone).");
+}
+const $=id=>document.getElementById(id);
+function setStatus(t){$("status").textContent=t;}
+
+// ---------- Normalisation (Lobanov) ----------
+function stats(arr){const m=arr.reduce((s,x)=>s+x,0)/arr.length; const sd=Math.sqrt(arr.reduce((s,x)=>s+(x-m)**2,0)/(arr.length-1||1)); return {m,sd:sd||1};}
+const REF1=stats(VOWELS.map(v=>v.f1)), REF2=stats(VOWELS.map(v=>v.f2));
+function learnerStats(){
+  const d=VOWELS.map(v=>state.data[v.v]).filter(x=>x&&x.f1&&x.f2);
+  if(d.length<6) return null;
+  return {s1:stats(d.map(x=>x.f1)),s2:stats(d.map(x=>x.f2))};
+}
+function coords(){ // returns {ref:[{v,x,y,sx,sy}], lr:{v:{x,y}}, ok}
+  const z=state.scale==="z"; const ls=z?learnerStats():null;
+  const ref=VOWELS.map(v=>z?{v:v.v,x:(v.f2-REF2.m)/REF2.sd,y:(v.f1-REF1.m)/REF1.sd,sx:v.s2/REF2.sd,sy:v.s1/REF1.sd}:{v:v.v,x:v.f2,y:v.f1,sx:v.s2,sy:v.s1});
+  const lr={};
+  for(const v of VOWELS){const d=state.data[v.v]; if(!d||!d.f1||!d.f2) continue;
+    if(z){ if(!ls) continue; lr[v.v]={x:(d.f2-ls.s2.m)/ls.s2.sd,y:(d.f1-ls.s1.m)/ls.s1.sd}; }
+    else lr[v.v]={x:d.f2,y:d.f1};
+  }
+  return {ref,lr,ok:!z||!!ls};
+}
+function assess(v,c){
+  const p=c.lr[v]; if(!p) return null;
+  const r=c.ref.find(q=>q.v===v);
+  const dx=(p.x-r.x)/r.sx, dy=(p.y-r.y)/r.sy, d=Math.hypot(dx,dy);
+  let near=null,nd=1e9; for(const q of c.ref){const e=Math.hypot((p.x-q.x)/q.sx,(p.y-q.y)/q.sy); if(e<nd){nd=e;near=q.v;}}
+  const tips=[];
+  if(d>1.5){
+    if(dx>1) tips.push(["u","o","ɔ","y","ø","œ"].includes(v)?"trop antérieure : arrondissez et avancez davantage les lèvres, reculez la langue":"trop antérieure : reculez un peu la langue");
+    if(dx<-1) tips.push(["i","e","ɛ","y"].includes(v)?"trop postérieure : avancez la langue, pointe contre les dents du bas":"trop postérieure : avancez un peu la langue");
+    if(dy>1) tips.push("trop ouverte : fermez davantage la bouche");
+    if(dy<-1) tips.push("trop fermée : ouvrez davantage la bouche");
+  }
+  return {d,near,tips,cls:d<=1.5?"good":d<=3?"warn":"bad",label:d<=1.5?"Proche":d<=3?"À travailler":"Éloignée"};
+}
+
+// ---------- List ----------
+function renderList(){
+  const c=coords(), L=$("list"); L.innerHTML="";
+  for(const v of VOWELS){
+    const d=state.data[v.v]||{}, a=assess(v.v,c);
+    const row=document.createElement("div"); row.className="row"; row.id="row-"+v.v;
+    row.innerHTML=`<div class="ipa">${v.v}</div>
+      <div><div class="words">/${v.v}/ comme dans <i>${v.w}</i>${d.src?` · <span style="color:var(--muted)">${d.src}</span>`:""}</div>
+        <div class="vals">
+          <label>F1 <input id="f1-${v.v}" type="number" inputmode="numeric" min="100" max="1500" value="${d.f1??""}"></label>
+          <label>F2 <input id="f2-${v.v}" type="number" inputmode="numeric" min="300" max="3500" value="${d.f2??""}"></label>
+          ${a?`<span class="chip ${a.cls}">${a.label}</span>`:`<span class="chip none">${c.ok?"à mesurer":"6 voyelles min."}</span>`}
+        </div></div>
+      <div class="acts">
+        <button class="btn primary" data-rec="${v.v}">Micro</button>
+        <label class="btn">Fichier<input type="file" accept="audio/*" data-file="${v.v}"></label>
+      </div>`;
+    if(a && (a.tips.length || a.near!==v.v)){
+      const h=document.createElement("p"); h.className="hint";
+      let t=a.tips.join(" ; ");
+      if(a.near!==v.v) t=(t?t+". ":"")+`Elle ressemble plutôt à un <em>/${a.near}/</em> natif.`;
+      h.innerHTML=t.charAt(0).toUpperCase()+t.slice(1)+(t.endsWith(".")?"":".");
+      row.appendChild(h);
+    }
+    L.appendChild(row);
+  }
+  L.querySelectorAll("input[type=number]").forEach(inp=>inp.addEventListener("change",()=>{
+    const [f,v]=inp.id.split("-"); const val=parseFloat(inp.value);
+    state.data[v]=state.data[v]||{}; state.data[v][f]=isFinite(val)?Math.round(val):null; state.data[v].src="saisie";
+    save(); render();
+  }));
+  L.querySelectorAll("[data-rec]").forEach(b=>b.addEventListener("click",()=>record(b.dataset.rec,b)));
+  L.querySelectorAll("[data-file]").forEach(i=>i.addEventListener("change",()=>{ if(i.files[0]) fromFile(i.dataset.file,i.files[0]); }));
+}
+
+// ---------- Chart ----------
+function renderChart(){
+  const c=coords(), S=$("chart"), z=state.scale==="z";
+  const W=640,H=500,ml=58,mr=18,mt=20,mb=50;
+  const X=z?[2.2,-1.9]:[3000,500], Y=z?[-1.6,2.3]:[200,1000];
+  const sx=v=>ml+(v-X[0])/(X[1]-X[0])*(W-ml-mr), sy=v=>mt+(v-Y[0])/(Y[1]-Y[0])*(H-mt-mb);
+  let g="";
+  const xt=z?[2,1,0,-1]:[3000,2500,2000,1500,1000,500], yt=z?[-1,0,1,2]:[200,300,400,500,600,700,800,900,1000];
+  for(const t of xt) g+=`<line x1="${sx(t)}" x2="${sx(t)}" y1="${mt}" y2="${H-mb}" stroke="var(--line)"/><text x="${sx(t)}" y="${H-mb+18}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${t}</text>`;
+  for(const t of yt) g+=`<line x1="${ml}" x2="${W-mr}" y1="${sy(t)}" y2="${sy(t)}" stroke="var(--line)"/><text x="${ml-8}" y="${sy(t)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${t}</text>`;
+  g+=`<text x="${(ml+W-mr)/2}" y="${H-10}" text-anchor="middle" font-size="12" fill="var(--muted)">${z?"F2 (z-score)":"F2 (Hz)"} ← antérieure · postérieure →</text>`;
+  g+=`<text transform="translate(16 ${(mt+H-mb)/2}) rotate(-90)" text-anchor="middle" font-size="12" fill="var(--muted)">${z?"F1 (z-score)":"F1 (Hz)"} ↑ fermée · ouverte ↓</text>`;
+  const scx=(W-ml-mr)/Math.abs(X[1]-X[0]), scy=(H-mt-mb)/Math.abs(Y[1]-Y[0]);
+  for(const r of c.ref) g+=`<ellipse cx="${sx(r.x)}" cy="${sy(r.y)}" rx="${r.sx*scx}" ry="${r.sy*scy}" fill="var(--ref-fill)" stroke="var(--ref)" stroke-width=".8"><title>/${r.v}/ natives</title></ellipse>`;
+  const poly=pts=>pts.map(p=>`${sx(p.x)},${sy(p.y)}`).join(" ");
+  g+=`<polygon points="${poly(PERIPH.map(v=>c.ref.find(r=>r.v===v)))}" fill="none" stroke="var(--ref)" stroke-dasharray="4 4"/>`;
+  for(const r of c.ref) g+=`<text x="${sx(r.x)}" y="${sy(r.y)+6}" text-anchor="middle" font-size="18" fill="var(--ref)">${r.v}</text>`;
+  if(PERIPH.every(v=>c.lr[v])) g+=`<polygon points="${poly(PERIPH.map(v=>c.lr[v]))}" fill="var(--accent-soft)" fill-opacity=".45" stroke="var(--accent)" stroke-width="1.5"/>`;
+  for(const v in c.lr){ const p=c.lr[v], r=c.ref.find(q=>q.v===v), d=state.data[v];
+    g+=`<line x1="${sx(p.x)}" y1="${sy(p.y)}" x2="${sx(r.x)}" y2="${sy(r.y)}" stroke="var(--accent)" stroke-width="1" stroke-opacity=".55"/>`;
+    g+=`<circle cx="${sx(p.x)}" cy="${sy(p.y)}" r="13" fill="var(--accent)"><title>/${v}/ : F1 ${d.f1} Hz, F2 ${d.f2} Hz</title></circle><text x="${sx(p.x)}" y="${sy(p.y)+5}" text-anchor="middle" font-size="15" font-weight="600" fill="var(--surface)" pointer-events="none">${v}</text>`;
+  }
+  if(!c.ok) g+=`<text x="${W/2}" y="${H/2}" text-anchor="middle" font-size="14" fill="var(--ink)">Mesurez au moins 6 voyelles pour l'affichage normalisé.</text>`;
+  S.innerHTML=g;
+  $("csub").textContent=z?"Valeurs normalisées par locuteur (Lobanov) : compare des voix différentes. Axes inversés comme le trapèze de l'API.":"F2 en abscisse, F1 en ordonnée, axes inversés comme le trapèze de l'API.";
+}
+function render(){ renderList(); renderChart();
+  $("vf").setAttribute("aria-pressed",state.voice==="f"); $("vm").setAttribute("aria-pressed",state.voice==="m");
+  $("sh").setAttribute("aria-pressed",state.scale==="hz"); $("sz").setAttribute("aria-pressed",state.scale==="z");
+}
+
+// ---------- Audio ----------
+async function analyzeBuffer(ab){
+  const AC=window.AudioContext||window.webkitAudioContext; const ctx=new AC();
+  const buf=await ctx.decodeAudioData(ab); ctx.close&&ctx.close();
+  const sr=state.voice==="m"?10000:11000;
+  const off=new OfflineAudioContext(1,Math.ceil(buf.duration*sr),sr);
+  const src=off.createBufferSource(); src.buffer=buf; src.connect(off.destination); src.start();
+  const out=await off.startRendering();
+  return analyzeVowel(out.getChannelData(0),sr);
+}
+function store(v,res,src){
+  state.data[v]={f1:res.f1,f2:res.f2,f3:res.f3,src}; save(); render();
+  setStatus(`/${v}/ mesurée : F1 ${res.f1} Hz, F2 ${res.f2} Hz, F3 ${res.f3} Hz (partie stable : ${res.dur} ms).`);
+}
+async function fromFile(v,file){
+  setStatus(`Analyse de /${v}/…`);
+  try{ store(v,await analyzeBuffer(await file.arrayBuffer()),"fichier"); }
+  catch(e){ setStatus(`/${v}/ : ${e.message||"fichier illisible. Essayez un WAV ou un M4A."}`); }
+}
+let stream=null;
+async function record(v,btn){
+  try{
+    if(!stream) stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  }catch(e){ $("micnote").hidden=false; setStatus("Micro indisponible : utilisez « Fichier »."); return; }
+  const rec=new MediaRecorder(stream), chunks=[]; rec.ondataavailable=e=>chunks.push(e.data);
+  const row=$("row-"+v); row.classList.add("busy");
+  let t=2; btn.textContent="● 2 s"; btn.disabled=true;
+  const tick=setInterval(()=>{t--; btn.textContent=t>0?`● ${t} s`:"…";},1000);
+  rec.onstop=async()=>{ clearInterval(tick);
+    try{ store(v,await analyzeBuffer(await new Blob(chunks).arrayBuffer()),"micro"); }
+    catch(e){ setStatus(`/${v}/ : ${e.message||"enregistrement illisible."}`); render(); }
+  };
+  setStatus(`Prononcez /${v}/ maintenant (${v==="u"?"lèvres très arrondies, ":""}tenue 2 secondes)…`);
+  rec.start(); setTimeout(()=>rec.stop(),2000);
+}
+
+// ---------- Controls ----------
+$("vf").onclick=()=>{state.voice="f";save();render();};
+$("vm").onclick=()=>{state.voice="m";save();render();setStatus("Voix d'homme : plafond 5 000 Hz. Passez en affichage « normalisé » pour comparer à la référence féminine.");};
+$("sh").onclick=()=>{state.scale="hz";save();render();};
+$("sz").onclick=()=>{state.scale="z";save();render();};
+$("bex").onclick=()=>{loadExample(true);save();render();};
+$("bclr").onclick=()=>{state.data={};save();render();setStatus("Valeurs effacées. Enregistrez vos voyelles.");};
+$("bcsv").onclick=()=>{
+  const c=coords(); const lines=["voyelle,F1,F2,F3,source,distance_ET,statut,proche_de"];
+  for(const v of VOWELS){const d=state.data[v.v]; if(!d) continue; const a=assess(v.v,c);
+    lines.push([v.v,d.f1??"",d.f2??"",d.f3??"",d.src||"",a?a.d.toFixed(2):"",a?a.label:"",a?a.near:""].join(","));}
+  const txt=lines.join("\n"), box=$("csvbox");
+  const fallback=()=>{box.hidden=false;box.value=txt;box.focus();box.select();setStatus("Sélectionnez le texte ci-dessous et copiez-le.");};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(()=>setStatus("CSV copié : collez-le dans Excel ou un tableur."),fallback); else fallback();
+};
+render();
+</script>
+
+</body>
+</html>
