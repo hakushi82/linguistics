@@ -39,7 +39,7 @@ h1 span{font-family:var(--f-body);font-weight:400;font-size:.9rem;color:var(--mu
 .seg button{border:0;background:none;color:var(--ink);font:inherit;font-size:.86rem;padding:6px 12px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
 .lbl{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-right:6px}
-.btn{font:inherit;font-size:.86rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn{text-decoration:none;display:inline-block;font:inherit;font-size:.86rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
 button:focus-visible,input:focus-visible,label.btn:focus-within{outline:2px solid var(--accent);outline-offset:2px}
@@ -68,6 +68,13 @@ button:focus-visible,input:focus-visible,label.btn:focus-within{outline:2px soli
 svg{display:block;width:100%;height:auto}
 .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.78rem;color:var(--muted);margin:6px 4px 0}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-2px;margin-right:5px}
+.diag{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.diag h3{font-family:var(--f-display);font-weight:500;font-size:1rem;margin:0 4px 4px}
+.diag .bar{margin:6px 4px}
+.diag select{font:inherit;font-size:.86rem;border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:var(--surface);color:var(--ink)}
+.diag p{font-size:.8rem;color:var(--muted);margin:4px 4px}
+.diag p strong{color:var(--ink);font-weight:600}
+.diag .warn{color:var(--warn)}
 .src{font-size:.72rem;color:var(--muted);margin:10px 4px 0;max-width:70ch}
 .status{font-size:.82rem;color:var(--muted);min-height:1.3em;margin:0 0 8px}
 textarea{width:100%;font-family:var(--f-mono);font-size:.78rem;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
@@ -113,7 +120,20 @@ details p,details li{font-size:.88rem;color:var(--muted)}
       <span><i style="background:var(--accent)"></i>vos voyelles</span>
       <span><i style="background:var(--ref-fill);border:1px solid var(--ref)"></i>natives : moyenne ± 1 écart-type</span>
     </div>
-    <p class="src">Référence : Georgeton, Paillereau, Landron, Gao &amp; Kamiyama (2012), 40 locutrices parisiennes, voyelles isolées en phrase-cadre, Actes JEP 2012, p. 145-152. Mesure : prédiction linéaire (LPC, ordre 10) sur la partie stable de la voyelle ; plafond 5 500 Hz (femme) ou 5 000 Hz (homme). Pour une voix d'homme, l'affichage « normalisé » (Lobanov) est recommandé, la référence étant féminine.</p>
+    <div class="diag" id="diag">
+      <h3>Contrôle de la mesure</h3>
+      <p id="dempty">Après un enregistrement, le spectre de la voyelle s'affiche ici pour vérifier où ont été placés F1, F2 et F3.</p>
+      <div id="dbody" hidden>
+        <div class="bar">
+          <select id="dsel" aria-label="Voyelle à contrôler"></select>
+          <button class="btn" id="dplay">Réécouter</button>
+          <a class="btn" id="dwav" download="voyelle.wav" href="#">Télécharger le WAV</a>
+        </div>
+        <svg id="spec" viewBox="0 0 640 220" role="img" aria-label="Spectre de la voyelle"></svg>
+        <p id="dinfo"></p>
+      </div>
+    </div>
+    <p class="src">Référence : Georgeton, Paillereau, Landron, Gao &amp; Kamiyama (2012), 40 locutrices parisiennes, voyelles isolées en phrase-cadre, Actes JEP 2012, p. 145-152. Mesure : méthode de Burg (LPC, ordre 10, comme Praat) sur la partie stable de la voyelle ; plusieurs plafonds sont testés (4 500 à 6 500 Hz pour une femme, 4 000 à 6 000 Hz pour un homme) et le plus stable est retenu, selon le principe de Fast Track (Barreda 2021). Pour une voix d'homme, l'affichage « normalisé » (Lobanov) est recommandé, la référence étant féminine.</p>
   </div>
 </div>
 <textarea id="csvbox" rows="6" hidden aria-label="CSV"></textarea>
@@ -121,13 +141,14 @@ details p,details li{font-size:.88rem;color:var(--muted)}
 <details>
   <summary>Comment ça marche</summary>
   <ol>
-    <li>Choisissez la voix (femme / homme) : cela règle le plafond d'analyse des formants.</li>
-    <li>Pour chaque voyelle, cliquez « Micro » et prononcez la voyelle pendant 2 secondes, ou importez un fichier audio (WAV, M4A, MP3).</li>
-    <li>La page repère la partie la plus énergique et stable du son, calcule F1, F2, F3 toutes les 10 ms et garde la médiane.</li>
+    <li>Choisissez la voix (femme / homme) : cela règle la plage de plafonds d'analyse testés.</li>
+    <li>Pour chaque voyelle, cliquez « Micro » et prononcez la voyelle pendant 2 secondes, dans un endroit calme, ou importez un fichier audio (WAV, M4A, MP3).</li>
+    <li>La page repère la partie la plus énergique et stable du son, calcule F1, F2, F3 toutes les 10 ms avec cinq plafonds différents, garde le plafond qui donne les valeurs les plus stables, puis la médiane.</li>
+    <li>Le panneau « Contrôle de la mesure » montre le spectre, l'enveloppe LPC et les formants retenus. Le WAV téléchargé peut être ouvert dans Praat pour comparer.</li>
     <li>La pastille compare votre voyelle à la cible native en écarts-types ; le conseil indique dans quelle direction corriger, et si la voyelle se rapproche d'une autre voyelle française.</li>
     <li>Vous pouvez corriger une valeur à la main (par exemple mesurée dans Praat) : le graphique se met à jour.</li>
   </ol>
-  <p>Limite : l'estimation automatique peut se tromper sur les voyelles postérieures (/u o ɔ/), où F1 et F2 sont proches. Vérifiez qu'une valeur paraît plausible avant de l'interpréter.</p>
+  <p>Limite : dans les voyelles postérieures (/u o ɔ/), F2 est faible et proche de F1. Le bruit de fond peut alors masquer F2 et faire mesurer F3 à sa place (F2 de plus de 2 000 Hz pour un /u/). Enregistrez au calme, micro proche de la bouche, et vérifiez le spectre en cas de doute.</p>
 </details>
 </div>
 
@@ -150,24 +171,54 @@ const PERIPH=["i","e","ɛ","a","ɔ","o","u"];
 const EXAMPLE={i:[300,2480],e:[440,2320],"ɛ":[480,2260],a:[790,1480],"ɔ":[540,1080],o:[470,1010],u:[330,1260],y:[300,1880],"ø":[410,1480],"œ":[440,1530]};
 
 // ANALYSIS-START
-function levinson(r,p){
-  const a=new Float64Array(p+1); a[0]=1; let e=r[0];
-  for(let i=1;i<=p;i++){
-    let acc=r[i]; for(let j=1;j<i;j++) acc+=a[j]*r[i-j];
-    const k=-acc/e; const t=a.slice();
-    for(let j=1;j<i;j++) a[j]=t[j]+k*t[i-j];
-    a[i]=k; e*=(1-k*k); if(e<=0) break;
+// Signal analysis modelled on Praat's "To Formant (burg)" and on Fast Track (Barreda 2021):
+// high-pass, resampling to 2 x ceiling, pre-emphasis from 50 Hz, Gaussian window, Burg LPC,
+// several ceilings tried and the most stable formant tracks kept.
+function highpass(x,sr,fc){ // 2nd-order Butterworth
+  const w=Math.tan(Math.PI*fc/sr), q=Math.SQRT1_2, n=1/(1+w/q+w*w);
+  const b0=n, b1=-2*n, b2=n, a1=2*(w*w-1)*n, a2=(1-w/q+w*w)*n;
+  const y=new Float64Array(x.length); let x1=0,x2=0,y1=0,y2=0;
+  for(let i=0;i<x.length;i++){const v=b0*x[i]+b1*x1+b2*x2-a1*y1-a2*y2; x2=x1;x1=x[i];y2=y1;y1=v;y[i]=v;}
+  return y;
+}
+function resample(x,sIn,sOut){
+  if(sIn===sOut) return Float64Array.from(x);
+  const ratio=sOut/sIn, fc=Math.min(1,ratio)*0.92, half=Math.ceil(8/fc);
+  const n=Math.floor(x.length*ratio), y=new Float64Array(n);
+  for(let j=0;j<n;j++){
+    const t=j/ratio, i0=Math.floor(t); let s=0;
+    for(let k=i0-half+1;k<=i0+half;k++){
+      if(k<0||k>=x.length) continue;
+      const d=t-k, u=fc*d, sinc=u===0?1:Math.sin(Math.PI*u)/(Math.PI*u);
+      const wv=0.42+0.5*Math.cos(Math.PI*d/half)+0.08*Math.cos(2*Math.PI*d/half);
+      s+=x[k]*fc*sinc*wv;
+    }
+    y[j]=s;
+  }
+  return y;
+}
+function burg(x,p){
+  const N=x.length, f=Float64Array.from(x), b=Float64Array.from(x);
+  let a=new Float64Array(p+1); a[0]=1;
+  for(let m=0;m<p;m++){
+    let num=0,den=0;
+    for(let n=m+1;n<N;n++){num+=f[n]*b[n-1]; den+=f[n]*f[n]+b[n-1]*b[n-1];}
+    if(den<=0) break;
+    const k=-2*num/den, na=a.slice();
+    for(let i=1;i<=m+1;i++) na[i]=a[i]+k*a[m+1-i];
+    a=na;
+    for(let n=N-1;n>m;n--){const fn=f[n]+k*b[n-1], bn=b[n-1]+k*f[n]; f[n]=fn; b[n]=bn;}
   }
   return a;
 }
-function polyRoots(c){ // monic: z^p + c1 z^(p-1) + ... + cp, c[0]=1
+function polyRoots(c){ // Durand-Kerner on z^p + c1 z^(p-1) + ... + cp
   const p=c.length-1, re=new Float64Array(p), im=new Float64Array(p);
-  let zr=0.4, zi=0.9, wr=1, wi=0;
-  for(let k=0;k<p;k++){const nr=wr*zr-wi*zi, ni=wr*zi+wi*zr; wr=nr; wi=ni; re[k]=wr; im[k]=wi;}
+  let wr=1, wi=0;
+  for(let k=0;k<p;k++){const nr=wr*0.4-wi*0.9, ni=wr*0.9+wi*0.4; wr=nr; wi=ni; re[k]=wr; im[k]=wi;}
   for(let it=0;it<500;it++){
     let delta=0;
     for(let k=0;k<p;k++){
-      let pr=1, pi=0; // Horner
+      let pr=1, pi=0;
       for(let j=1;j<=p;j++){const nr=pr*re[k]-pi*im[k]+c[j], ni=pr*im[k]+pi*re[k]; pr=nr; pi=ni;}
       let dr=1, di=0;
       for(let j=0;j<p;j++){ if(j===k) continue; const xr=re[k]-re[j], xi=im[k]-im[j]; const nr=dr*xr-di*xi, ni=dr*xi+di*xr; dr=nr; di=ni;}
@@ -178,24 +229,26 @@ function polyRoots(c){ // monic: z^p + c1 z^(p-1) + ... + cp, c[0]=1
   }
   return {re,im};
 }
-function frameFormants(x,sr,order){
-  const n=x.length, y=new Float64Array(n);
-  for(let i=0;i<n;i++){ const pre=i?x[i]-0.97*x[i-1]:x[i]; y[i]=pre*(0.54-0.46*Math.cos(2*Math.PI*i/(n-1))); }
-  const r=new Float64Array(order+1);
-  for(let l=0;l<=order;l++){let s=0; for(let i=l;i<n;i++) s+=y[i]*y[i-l]; r[l]=s;}
-  if(r[0]<=0) return null; r[0]*=1.0001;
-  const a=levinson(r,order), rt=polyRoots(a), out=[];
-  for(let k=0;k<order;k++){
+function gaussWin(n){const w=new Float64Array(n), e=Math.exp(-12); for(let i=0;i<n;i++){const t=i/(n-1)-0.5; w[i]=(Math.exp(-48*t*t)-e)/(1-e);} return w;}
+function frameLPC(seg,sr,order){
+  const n=seg.length, y=new Float64Array(n), w=gaussWin(n), al=Math.exp(-2*Math.PI*50/sr);
+  for(let i=0;i<n;i++) y[i]=(i?seg[i]-al*seg[i-1]:seg[i])*w[i];
+  return burg(y,order);
+}
+function lpcFormants(a,sr){
+  const rt=polyRoots(a), out=[];
+  for(let k=0;k<rt.re.length;k++){
     if(rt.im[k]<=1e-6) continue;
     const f=Math.atan2(rt.im[k],rt.re[k])*sr/(2*Math.PI);
     const bw=-Math.log(Math.hypot(rt.re[k],rt.im[k]))*sr/Math.PI;
-    if(f>90 && f<sr/2-50 && bw<(f<1000?1200:700)) out.push(f);
+    if(f>90 && f<sr/2-50 && bw<1000) out.push({f,bw});
   }
-  return out.sort((p,q)=>p-q);
+  return out.sort((p,q)=>p.f-q.f);
 }
 function median(a){const s=[...a].sort((p,q)=>p-q), m=s.length>>1; return s.length%2?s[m]:(s[m-1]+s[m])/2;}
-function analyzeVowel(x,sr){
-  const fl=Math.round(0.04*sr), hop=Math.round(0.01*sr), rms=[];
+function mad(a){const m=median(a); return median(a.map(v=>Math.abs(v-m)));}
+function findSegment(x,sr){ // longest high-energy stretch, middle half kept
+  const fl=Math.round(0.03*sr), hop=Math.round(0.01*sr), rms=[];
   for(let s=0;s+fl<=x.length;s+=hop){let e=0; for(let i=s;i<s+fl;i++) e+=x[i]*x[i]; rms.push(Math.sqrt(e/fl));}
   if(!rms.length) throw new Error("Son trop court.");
   const mx=Math.max(...rms); if(mx<1e-4) throw new Error("Aucun son détecté : parlez plus fort ou rapprochez le micro.");
@@ -205,15 +258,36 @@ function analyzeVowel(x,sr){
     else if(cur>=0){ if(i-cur>best[1]-best[0]+1) best=[cur,i-1]; cur=-1; }
   }
   const len=best[1]-best[0]+1;
-  if(len<8) throw new Error("Voyelle trop brève : tenez-la environ une seconde.");
-  const a=best[0]+Math.floor(len*0.25), b=best[1]-Math.floor(len*0.25);
-  const F1=[],F2=[],F3=[];
-  for(let f=a;f<=b;f++){
-    const fm=frameFormants(x.subarray(f*hop,f*hop+fl),sr,10);
-    if(fm && fm.length>=2){F1.push(fm[0]);F2.push(fm[1]); if(fm.length>=3) F3.push(fm[2]);}
+  if(len<12) throw new Error("Voyelle trop brève : tenez-la environ une seconde.");
+  const t0=(best[0]+len*0.25)*0.01, t1=(best[1]-len*0.25)*0.01+0.03;
+  return {t0,t1,dur:Math.round(len*10)};
+}
+const CEILINGS={f:[4500,5000,5500,6000,6500],m:[4000,4500,5000,5500,6000]};
+function analyzeAt(x,sr,seg,ceiling){
+  const sr2=2*ceiling, m0=Math.max(0,Math.floor((seg.t0-0.05)*sr)), m1=Math.min(x.length,Math.ceil((seg.t1+0.05)*sr));
+  const y=resample(x.subarray(m0,m1),sr,sr2), off=seg.t0-m0/sr;
+  const win=Math.round(0.05*sr2), hop=Math.round(0.01*sr2);
+  const s0=Math.max(0,Math.round(off*sr2)-(win>>1)), s1=Math.min(y.length-win, Math.round((off+seg.t1-seg.t0)*sr2)-(win>>1));
+  const F=[[],[],[]]; let frames=0, used=0;
+  for(let s=s0;s<=s1;s+=hop){
+    frames++;
+    const fm=lpcFormants(frameLPC(y.subarray(s,s+win),sr2,10),sr2);
+    if(fm.length<3) continue;
+    used++; for(let k=0;k<3;k++) F[k].push(fm[k].f);
   }
-  if(F1.length<3) throw new Error("Formants introuvables : réessayez dans un endroit calme.");
-  return {f1:Math.round(median(F1)),f2:Math.round(median(F2)),f3:F3.length?Math.round(median(F3)):null,dur:Math.round(len*10)};
+  if(used<3) return null;
+  const med=F.map(median);
+  let score=F.reduce((s,t,k)=>s+mad(t)/med[k],0)+2*(1-used/frames);
+  if(med[0]<150||med[0]>1200||med[1]-med[0]<80) score+=10;
+  return {ceiling,f1:Math.round(med[0]),f2:Math.round(med[1]),f3:Math.round(med[2]),score,y,sr:sr2,s0,s1,win};
+}
+function analyzeVowelMulti(x,sr,voice){
+  const xh=highpass(x,sr,70), seg=findSegment(xh,sr);
+  const all=(CEILINGS[voice]||CEILINGS.f).map(c=>analyzeAt(xh,sr,seg,c)).filter(Boolean);
+  if(!all.length) throw new Error("Formants introuvables : réessayez dans un endroit calme.");
+  const best=all.reduce((p,q)=>q.score<p.score?q:p);
+  return {f1:best.f1,f2:best.f2,f3:best.f3,dur:seg.dur,ceiling:best.ceiling,best,
+    alts:all.map(r=>({ceiling:r.ceiling,f1:r.f1,f2:r.f2,f3:r.f3,score:+r.score.toFixed(3)}))};
 }
 // ANALYSIS-END
 
@@ -329,22 +403,27 @@ function render(){ renderList(); renderChart();
 }
 
 // ---------- Audio ----------
-async function analyzeBuffer(ab){
+const AUDIO={}; // last recording per vowel: {x, sr, res}
+async function decode(ab){
   const AC=window.AudioContext||window.webkitAudioContext; const ctx=new AC();
-  const buf=await ctx.decodeAudioData(ab); ctx.close&&ctx.close();
-  const sr=state.voice==="m"?10000:11000;
-  const off=new OfflineAudioContext(1,Math.ceil(buf.duration*sr),sr);
-  const src=off.createBufferSource(); src.buffer=buf; src.connect(off.destination); src.start();
-  const out=await off.startRendering();
-  return analyzeVowel(out.getChannelData(0),sr);
+  try{ const buf=await ctx.decodeAudioData(ab); return {x:buf.getChannelData(0).slice(), sr:buf.sampleRate}; }
+  finally{ ctx.close&&ctx.close(); }
+}
+async function analyzeBuffer(v,ab){
+  const {x,sr}=await decode(ab);
+  await new Promise(r=>setTimeout(r,0));
+  const res=analyzeVowelMulti(x,sr,state.voice);
+  AUDIO[v]={x,sr,res};
+  return res;
 }
 function store(v,res,src){
-  state.data[v]={f1:res.f1,f2:res.f2,f3:res.f3,src}; save(); render();
-  setStatus(`/${v}/ mesurée : F1 ${res.f1} Hz, F2 ${res.f2} Hz, F3 ${res.f3} Hz (partie stable : ${res.dur} ms).`);
+  state.data[v]={f1:res.f1,f2:res.f2,f3:res.f3,src}; save(); render(); showDiag(v);
+  const shaky=res.best.score>0.15;
+  setStatus(`/${v}/ mesurée : F1 ${res.f1} Hz, F2 ${res.f2} Hz, F3 ${res.f3} Hz (partie stable : ${res.dur} ms, plafond ${res.ceiling} Hz).`+(shaky?" Mesure instable : réenregistrez au calme, micro plus proche.":""));
 }
 async function fromFile(v,file){
   setStatus(`Analyse de /${v}/…`);
-  try{ store(v,await analyzeBuffer(await file.arrayBuffer()),"fichier"); }
+  try{ store(v,await analyzeBuffer(v,await file.arrayBuffer()),"fichier"); }
   catch(e){ setStatus(`/${v}/ : ${e.message||"fichier illisible. Essayez un WAV ou un M4A."}`); }
 }
 let stream=null;
@@ -354,19 +433,86 @@ async function record(v,btn){
   }catch(e){ $("micnote").hidden=false; setStatus("Micro indisponible : utilisez « Fichier »."); return; }
   const rec=new MediaRecorder(stream), chunks=[]; rec.ondataavailable=e=>chunks.push(e.data);
   const row=$("row-"+v); row.classList.add("busy");
-  let t=2; btn.textContent="● 2 s"; btn.disabled=true;
+  let t=3; btn.textContent="● 3 s"; btn.disabled=true;
   const tick=setInterval(()=>{t--; btn.textContent=t>0?`● ${t} s`:"…";},1000);
-  rec.onstop=async()=>{ clearInterval(tick);
-    try{ store(v,await analyzeBuffer(await new Blob(chunks).arrayBuffer()),"micro"); }
+  rec.onstop=async()=>{ clearInterval(tick); setStatus(`Analyse de /${v}/…`);
+    try{ store(v,await analyzeBuffer(v,await new Blob(chunks).arrayBuffer()),"micro"); }
     catch(e){ setStatus(`/${v}/ : ${e.message||"enregistrement illisible."}`); render(); }
   };
   setStatus(`Prononcez /${v}/ maintenant (${v==="u"?"lèvres très arrondies, ":""}tenue 2 secondes)…`);
-  rec.start(); setTimeout(()=>rec.stop(),2000);
+  rec.start(); setTimeout(()=>rec.stop(),3000);
 }
+
+// ---------- Measurement check: spectrum, LPC envelope, chosen formants ----------
+function fft(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){ let bit=n>>1; for(;j&bit;bit>>=1) j^=bit; j^=bit; if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]];} }
+  for(let len=2;len<=n;len<<=1){ const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang);
+    for(let i=0;i<n;i+=len){ let cr=1,ci=0;
+      for(let k=0;k<len/2;k++){ const a=i+k,b=a+len/2, tr=re[b]*cr-im[b]*ci, ti=re[b]*ci+im[b]*cr;
+        re[b]=re[a]-tr; im[b]=im[a]-ti; re[a]+=tr; im[a]+=ti; const nc=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=nc; } } }
+}
+function spectrum(r){
+  const N=1024, half=N/2, acc=new Float64Array(half), w=gaussWin(r.win); let cnt=0;
+  for(let s=r.s0;s<=r.s1;s+=Math.round(r.win/2)){
+    const re=new Float64Array(N), im=new Float64Array(N);
+    for(let i=0;i<r.win&&i<N;i++) re[i]=r.y[s+i]*w[i];
+    fft(re,im); for(let k=0;k<half;k++) acc[k]+=re[k]*re[k]+im[k]*im[k]; cnt++;
+  }
+  const mid=Math.round((r.s0+r.s1)/2), a=frameLPC(r.y.subarray(mid,mid+r.win),r.sr,10), env=new Float64Array(half);
+  for(let k=0;k<half;k++){ let pr=0,pi=0; const om=Math.PI*k/half;
+    for(let j=0;j<a.length;j++){ pr+=a[j]*Math.cos(om*j); pi-=a[j]*Math.sin(om*j); }
+    env[k]=1/(pr*pr+pi*pi); }
+  const db=v=>10*Math.log10(v+1e-20);
+  const S=Array.from(acc,v=>db(v/cnt)), E=Array.from(env,db);
+  const sMax=Math.max(...S), eMax=Math.max(...E);
+  return {S:S.map(v=>v-sMax), E:E.map(v=>v-eMax), half, sr:r.sr};
+}
+function showDiag(v){
+  const keys=VOWELS.map(q=>q.v).filter(k=>AUDIO[k]);
+  $("dempty").hidden=keys.length>0; $("dbody").hidden=!keys.length;
+  if(!keys.length) return;
+  const sel=$("dsel"); sel.innerHTML=keys.map(k=>`<option value="${k}">/${k}/</option>`).join(""); sel.value=v&&AUDIO[v]?v:keys[0];
+  drawDiag(sel.value);
+}
+function drawDiag(v){
+  const A=AUDIO[v]; if(!A) return; const r=A.res.best, sp=spectrum(r);
+  const W=640,H=220,ml=40,mr=12,mt=12,mb=34, fmax=Math.min(5000,r.sr/2), floor=-60;
+  const X=f=>ml+f/fmax*(W-ml-mr), Y=d=>mt+Math.min(1,Math.max(0,-d/(-floor)))*(H-mt-mb);
+  let g="";
+  for(let f=0;f<=fmax;f+=1000) g+=`<line x1="${X(f)}" x2="${X(f)}" y1="${mt}" y2="${H-mb}" stroke="var(--line)"/><text x="${X(f)}" y="${H-mb+16}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${f}</text>`;
+  for(let d=0;d>=floor;d-=20) g+=`<text x="${ml-6}" y="${Y(d)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${d}</text>`;
+  g+=`<text x="${(ml+W-mr)/2}" y="${H-4}" text-anchor="middle" font-size="11" fill="var(--muted)">fréquence (Hz) · niveau (dB)</text>`;
+  const kmax=Math.min(sp.half-1,Math.floor(fmax/(sp.sr/2)*sp.half));
+  const path=arr=>{let d="";for(let k=1;k<=kmax;k++) d+=(k>1?"L":"M")+X(k/sp.half*sp.sr/2).toFixed(1)+" "+Y(arr[k]).toFixed(1); return d;};
+  g+=`<path d="${path(sp.S)}" fill="none" stroke="var(--ref)" stroke-width="1"/>`;
+  g+=`<path d="${path(sp.E)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  [["F1",A.res.f1],["F2",A.res.f2],["F3",A.res.f3]].forEach(([n,f])=>{ if(!f||f>fmax) return;
+    g+=`<line x1="${X(f)}" x2="${X(f)}" y1="${mt}" y2="${H-mb}" stroke="var(--accent)" stroke-dasharray="3 3"/><text x="${X(f)+4}" y="${mt+12}" font-size="12" font-weight="600" fill="var(--accent)">${n}</text>`; });
+  $("spec").innerHTML=g;
+  const ref=VOWELS.find(q=>q.v===v);
+  $("dinfo").innerHTML=`Gris : spectre moyen. Bleu : enveloppe LPC. <strong>Plafond retenu : ${A.res.ceiling} Hz</strong>. Autres plafonds testés : `+
+    A.res.alts.filter(a=>a.ceiling!==A.res.ceiling).map(a=>`${a.ceiling} Hz → F1 ${a.f1}, F2 ${a.f2}`).join(" ; ")+
+    `. Cible native /${v}/ : F1 ${ref.f1}, F2 ${ref.f2} Hz.`+(r.score>0.15?` <span class="warn">Mesure instable : réenregistrez au calme.</span>`:"");
+  try{ const url=URL.createObjectURL(wavBlob(A.x,A.sr)); const a=$("dwav"); if(a.dataset.url) URL.revokeObjectURL(a.dataset.url); a.href=url; a.dataset.url=url; a.download=`voyelle-${v}.wav`; }catch(e){}
+}
+function wavBlob(x,sr){
+  const n=x.length, buf=new ArrayBuffer(44+n*2), d=new DataView(buf), w=(o,s)=>{for(let i=0;i<s.length;i++) d.setUint8(o+i,s.charCodeAt(i));};
+  w(0,"RIFF"); d.setUint32(4,36+n*2,true); w(8,"WAVE"); w(12,"fmt "); d.setUint32(16,16,true); d.setUint16(20,1,true); d.setUint16(22,1,true);
+  d.setUint32(24,sr,true); d.setUint32(28,sr*2,true); d.setUint16(32,2,true); d.setUint16(34,16,true); w(36,"data"); d.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++) d.setInt16(44+i*2,Math.max(-1,Math.min(1,x[i]))*32767,true);
+  return new Blob([buf],{type:"audio/wav"});
+}
+let player=null;
+$("dsel").onchange=()=>drawDiag($("dsel").value);
+$("dplay").onclick=()=>{ const A=AUDIO[$("dsel").value]; if(!A) return;
+  const AC=window.AudioContext||window.webkitAudioContext; if(!player) player=new AC();
+  const b=player.createBuffer(1,A.x.length,A.sr); b.copyToChannel?b.copyToChannel(A.x,0):b.getChannelData(0).set(A.x);
+  const src=player.createBufferSource(); src.buffer=b; src.connect(player.destination); src.start(); };
 
 // ---------- Controls ----------
 $("vf").onclick=()=>{state.voice="f";save();render();};
-$("vm").onclick=()=>{state.voice="m";save();render();setStatus("Voix d'homme : plafond 5 000 Hz. Passez en affichage « normalisé » pour comparer à la référence féminine.");};
+$("vm").onclick=()=>{state.voice="m";save();render();setStatus("Voix d'homme : plafonds de 4 000 à 6 000 Hz. Passez en affichage « normalisé » pour comparer à la référence féminine.");};
 $("sh").onclick=()=>{state.scale="hz";save();render();};
 $("sz").onclick=()=>{state.scale="z";save();render();};
 $("bex").onclick=()=>{loadExample(true);save();render();};
